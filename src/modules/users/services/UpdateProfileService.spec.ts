@@ -56,4 +56,57 @@ describe('UpdateProfile', () => {
       }),
     ).rejects.toBeInstanceOf(AppError);
   });
+
+  it('should be able to update the password', async () => {
+    const user = await fakeUsersRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@gmail.com',
+      password: '123456',
+    });
+
+    const updatedUser = await updateProfile.execute({
+      user_id: user.id,
+      name: 'John Two',
+      email: 'johntwo@gmail.com',
+      old_password: '123456',
+      password: '123123',
+    });
+
+    expect(updatedUser.password).toBe('123123');
+  });
+
+  it('should no be able to update the password without old password', async () => {
+    const user = await fakeUsersRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@gmail.com',
+      password: '123456',
+    });
+
+    await expect(
+      updateProfile.execute({
+        user_id: user.id,
+        name: 'John Two',
+        email: 'johntwo@gmail.com',
+        password: '123123',
+      }),
+    ).rejects.toBeInstanceOf(AppError);
+  });
+
+  it('should no be able to update the password with wrong old password', async () => {
+    const user = await fakeUsersRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@gmail.com',
+      password: '123456',
+    });
+
+    await expect(
+      updateProfile.execute({
+        user_id: user.id,
+        name: 'John Two',
+        email: 'johntwo@gmail.com',
+        old_password: 'worng-old-password',
+        password: '123123',
+      }),
+    ).rejects.toBeInstanceOf(AppError);
+  });
 });
