@@ -1,5 +1,4 @@
-// import AppError from '@shared/errors/AppError';
-
+import AppError from '@shared/errors/AppError';
 import FakeHashProvider from '../providers/HashProvider/fakes/FakeHashProvider';
 import FakeUsersRepository from '../repositories/fakes/FakeUsersRepository';
 import UpdateProfileService from './UpdateProfileService';
@@ -34,5 +33,27 @@ describe('UpdateProfile', () => {
 
     expect(updatedUser.name).toBe('John Two');
     expect(updatedUser.email).toBe('johntwo@gmail.com');
+  });
+
+  it('should not be able to change to another user email', async () => {
+    await fakeUsersRepository.create({
+      name: 'John Doe',
+      email: 'johndoe@gmail.com',
+      password: '123456',
+    });
+
+    const user = await fakeUsersRepository.create({
+      name: 'Test',
+      email: 'test@gmail.com',
+      password: '123456',
+    });
+
+    await expect(
+      updateProfile.execute({
+        user_id: user.id,
+        name: 'John Doe',
+        email: 'johndoe@gmail.com',
+      }),
+    ).rejects.toBeInstanceOf(AppError);
   });
 });
